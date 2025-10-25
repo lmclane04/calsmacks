@@ -4,7 +4,7 @@ export interface SceneObject {
   rotation?: [number, number, number];
   scale?: [number, number, number];
   color?: string;
-  properties?: Record<string, any>;
+  properties?: Record<string, unknown>;
 }
 
 export interface SceneConfig {

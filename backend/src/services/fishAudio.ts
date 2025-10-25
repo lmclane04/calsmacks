@@ -39,8 +39,9 @@ export class FishAudioService {
       );
 
       return response.data.text || response.data.transcription;
-    } catch (error: any) {
-      console.error('Fish Audio ASR error:', error.response?.data || error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Fish Audio ASR error:', errorMessage);
       console.log('Falling back to mock transcription');
       return this.getMockTranscription();
     }
@@ -77,8 +78,9 @@ export class FishAudioService {
       // For now, return a base64 data URL
       const base64Audio = Buffer.from(response.data).toString('base64');
       return `data:audio/mp3;base64,${base64Audio}`;
-    } catch (error: any) {
-      console.error('Fish Audio TTS error:', error.response?.data || error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Fish Audio TTS error:', errorMessage);
       console.log('Falling back to mock audio URL');
       return this.getMockAudioUrl();
     }
@@ -87,7 +89,7 @@ export class FishAudioService {
   /**
    * List available voices
    */
-  async listVoices(): Promise<any[]> {
+  async listVoices(): Promise<Array<{ id: string; name: string; language: string }>> {
     if (!this.apiKey) {
       return this.getMockVoices();
     }
@@ -100,8 +102,9 @@ export class FishAudioService {
       });
 
       return response.data.voices || response.data;
-    } catch (error: any) {
-      console.error('Fish Audio voices error:', error.response?.data || error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Fish Audio voices error:', errorMessage);
       return this.getMockVoices();
     }
   }
@@ -124,7 +127,7 @@ export class FishAudioService {
   /**
    * Mock voices for development/testing
    */
-  private getMockVoices(): any[] {
+  private getMockVoices(): Array<{ id: string; name: string; language: string }> {
     return [
       { id: 'default', name: 'Default Voice', language: 'en-US' },
       { id: 'dreamy', name: 'Dreamy Narrator', language: 'en-US' },

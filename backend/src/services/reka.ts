@@ -6,7 +6,7 @@ interface SceneObject {
   rotation?: [number, number, number];
   scale?: [number, number, number];
   color?: string;
-  properties?: Record<string, any>;
+  properties?: Record<string, unknown>;
 }
 
 interface SceneConfig {
@@ -105,8 +105,9 @@ Create 5-15 objects that represent the dream. Use creative positioning and color
       }
 
       throw new Error('Failed to parse scene configuration from response');
-    } catch (error: any) {
-      console.error('Reka API error:', error.response?.data || error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Reka API error:', errorMessage);
       console.log('Falling back to mock scene config');
       return this.getMockSceneConfig();
     }
@@ -146,10 +147,11 @@ Create an evocative, dreamlike narration that captures the essence and mood. Kee
       );
 
       return response.data.choices[0].message.content.trim();
-    } catch (error: any) {
-      console.error('Reka API error:', error.response?.data || error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Reka API error:', errorMessage);
       console.log('Falling back to mock poetic summary');
-      return this.getMockPoeticSummary(description);
+      return this.getMockPoeticSummary();
     }
   }
 
@@ -211,7 +213,7 @@ Create an evocative, dreamlike narration that captures the essence and mood. Kee
   /**
    * Mock poetic summary for development/testing
    */
-  private getMockPoeticSummary(description: string): string {
+  private getMockPoeticSummary(): string {
     return `In the realm between sleep and waking, where reality bends and dreams take form, you find yourself suspended in an ethereal space. Colors dance and shapes float, each element a fragment of your subconscious, weaving together a tapestry of wonder and mystery.`;
   }
 }

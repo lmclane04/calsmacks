@@ -29,11 +29,12 @@ router.post('/transcribe', upload.single('audio'), async (req: Request, res: Res
       text: transcription,
       timestamp: new Date().toISOString()
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('Error transcribing audio:', error);
     res.status(500).json({
       error: 'Failed to transcribe audio',
-      details: error.message
+      details: errorMessage
     });
   }
 });
@@ -58,11 +59,12 @@ router.post('/synthesize', async (req: Request, res: Response) => {
       audioUrl,
       timestamp: new Date().toISOString()
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('Error synthesizing speech:', error);
     res.status(500).json({
       error: 'Failed to synthesize speech',
-      details: error.message
+      details: errorMessage
     });
   }
 });

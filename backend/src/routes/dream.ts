@@ -38,11 +38,12 @@ router.post('/process', async (req: Request, res: Response) => {
       narrationUrl,
       timestamp: new Date().toISOString()
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('Error processing dream:', error);
     res.status(500).json({
       error: 'Failed to process dream',
-      details: error.message
+      details: errorMessage
     });
   }
 });
@@ -62,11 +63,12 @@ router.post('/scene', async (req: Request, res: Response) => {
     const sceneConfig = await rekaService.generateSceneConfig(description);
 
     res.json({ sceneConfig });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('Error generating scene:', error);
     res.status(500).json({
       error: 'Failed to generate scene',
-      details: error.message
+      details: errorMessage
     });
   }
 });
