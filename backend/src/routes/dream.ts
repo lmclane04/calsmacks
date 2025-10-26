@@ -1,18 +1,40 @@
 import { Router, Request, Response } from 'express';
 import { RekaService } from '../services/reka';
+import { GroqService } from '../services/groq';
 import { FishAudioService } from '../services/fishAudio';
 
 const router = Router();
 
 // Lazy load services to ensure environment variables are loaded
 let rekaService: RekaService | null = null;
+let groqService: GroqService | null = null;
 let fishAudioService: FishAudioService | null = null;
 
-function getRekaService() {
-  if (!rekaService) {
-    rekaService = new RekaService();
+// Determine which LLM service to use based on environment variable
+const USE_GROQ = process.env.USE_GROQ === 'true';
+
+// Log which service will be used on startup with detailed debugging
+console.log('='.repeat(60));
+console.log('🤖 LLM SERVICE CONFIGURATION');
+console.log(`   Environment Variable: USE_GROQ="${process.env.USE_GROQ}"`);
+console.log(`   Evaluated to: ${USE_GROQ}`);
+console.log(`   Active Service: ${USE_GROQ ? '✓ Groq (Fast)' : '✓ Reka'}`);
+console.log('='.repeat(60));
+
+function getLLMService() {
+  if (USE_GROQ) {
+    if (!groqService) {
+      groqService = new GroqService();
+      console.log('✓ Groq service initialized');
+    }
+    return groqService;
+  } else {
+    if (!rekaService) {
+      rekaService = new RekaService();
+      console.log('✓ Reka service initialized');
+    }
+    return rekaService;
   }
-  return rekaService;
 }
 
 function getFishAudioService() {
@@ -34,14 +56,18 @@ router.post('/process', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Dream description is required' });
     }
 
-    console.log('Processing dream:', description.substring(0, 100) + '...');
+    console.log('\n' + '='.repeat(60));
+    console.log('🌙 PROCESSING DREAM REQUEST');
+    console.log(`   Description: ${description.substring(0, 100)}...`);
+    console.log(`   LLM Service: ${USE_GROQ ? '⚡ Groq (llama-3.3-70b)' : '🔮 Reka (reka-core)'}`);
+    console.log('='.repeat(60));
 
-    // Step 1: Generate scene configuration using Reka
-    const sceneConfig = await getRekaService().generateSceneConfig(description);
+    // Step 1: Generate scene configuration using LLM (Groq or Reka)
+    const sceneConfig = await getLLMService().generateSceneConfig(description);
     console.log('✓ Scene config generated');
 
-    // Step 2: Generate poetic summary using Reka
-    const summary = await getRekaService().generatePoeticSummary(description);
+    // Step 2: Generate poetic summary using LLM (Groq or Reka)
+    const summary = await getLLMService().generatePoeticSummary(description);
     console.log('✓ Poetic summary generated');
 
     // Step 3: Generate narration audio using Fish Audio with optional voiceId
@@ -76,7 +102,7 @@ router.post('/scene', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Dream description is required' });
     }
 
-    const sceneConfig = await getRekaService().generateSceneConfig(description);
+    const sceneConfig = await getLLMService().generateSceneConfig(description);
 
     res.json({ sceneConfig });
   } catch (error: unknown) {
