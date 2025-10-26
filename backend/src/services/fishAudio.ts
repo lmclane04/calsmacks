@@ -66,9 +66,12 @@ export class FishAudioService {
         model: 's1'
       };
       
-      // Only add reference_id if voiceId is provided and not a placeholder
-      if (voiceId && voiceId !== 'default' && !voiceId.includes('-')) {
+      // Add reference_id if voiceId is provided (Fish Audio voice IDs are 32-char hex strings)
+      if (voiceId && voiceId.length === 32) {
         requestBody.reference_id = voiceId;
+        console.log(`🎤 Using Fish Audio voice: ${voiceId}`);
+      } else if (voiceId) {
+        console.log(`⚠️  Invalid voice ID format: ${voiceId} - using default voice`);
       }
       
       const response = await axios.post(

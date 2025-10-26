@@ -18,7 +18,7 @@ const VOICE_OPTIONS = [
 export default function DreamInput({ onSubmit, isLoading }: DreamInputProps) {
   const [description, setDescription] = useState('');
   const [isRecording, setIsRecording] = useState(false);
-  const [selectedVoice, setSelectedVoice] = useState('default');
+  const [selectedVoice, setSelectedVoice] = useState(VOICE_OPTIONS[0].id); // Default to first voice (Madison)
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [error, setError] = useState<string | null>(null);
