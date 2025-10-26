@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import DreamInput from './components/DreamInput';
 import SceneViewer from './components/SceneViewer';
+import AudioPlayer from './components/AudioPlayer';
 import { SceneConfig } from './types';
 
 function App() {
@@ -103,15 +104,12 @@ function App() {
             </div>
           </div>
 
-          {/* Audio Player */}
+          {/* Audio Player with Background Music */}
           {narrationUrl && (
             <div className="p-6 pointer-events-auto">
-              <audio
-                key={narrationUrl}
-                src={narrationUrl}
-                controls
-                autoPlay
-                className="w-full max-w-md mx-auto"
+              <AudioPlayer
+                narrationUrl={narrationUrl}
+                backgroundMusicUrl="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3"
               />
             </div>
           )}
