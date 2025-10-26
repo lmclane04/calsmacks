@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ChevronUp, ChevronDown } from 'lucide-react';
 import DreamInput from './components/DreamInput';
 import SceneViewer from './components/SceneViewer';
 import AudioPlayer from './components/AudioPlayer';
@@ -11,6 +12,7 @@ function App() {
   const [currentVoiceId, setCurrentVoiceId] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [isRegeneratingNarration, setIsRegeneratingNarration] = useState(false);
+  const [isNarrationVisible, setIsNarrationVisible] = useState(true);
 
   const handleDreamSubmit = async (description: string, voiceId?: string) => {
     setIsLoading(true);
@@ -87,32 +89,49 @@ function App() {
           </header>
 
           {/* Main Content */}
-          <div className="flex-1 flex items-end justify-center pb-8">
-            <div className="w-full max-w-2xl px-6 pointer-events-auto">
+          <div className="flex-1 flex items-end justify-center pb-4">
+            <div className="w-full max-w-xl px-6 pointer-events-auto">
               <DreamInput
                 onSubmit={handleDreamSubmit}
                 onVoiceChange={handleVoiceChange}
                 isLoading={isLoading || isRegeneratingNarration}
               />
               
-              {/* Summary Display */}
+              {/* Toggleable Summary Display */}
               {summary && (
-                <div className="mt-4 p-4 bg-black/50 backdrop-blur-md rounded-lg border border-purple-500/30">
-                  <p className="text-gray-200 italic">{summary}</p>
+                <div className="mt-4 relative">
+                  <div className="absolute -top-4 right-4 z-10 pointer-events-auto">
+                    <button 
+                      onClick={() => setIsNarrationVisible(!isNarrationVisible)}
+                      className="p-1 rounded-full bg-black/70 border border-purple-500/50 hover:bg-black/90 transition-colors"
+                    >
+                      {isNarrationVisible ? 
+                        <ChevronDown className="w-4 h-4 text-purple-300" /> : 
+                        <ChevronUp className="w-4 h-4 text-purple-300" />}
+                    </button>
+                  </div>
+                  <div 
+                    className={`overflow-hidden transition-all duration-300 ease-in-out ${isNarrationVisible ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}
+                  >
+                    <div className="p-3 bg-black/60 backdrop-blur-md rounded-lg border border-purple-500/30">
+                      <p className="text-gray-200 italic text-sm">{summary}</p>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Audio Player with Background Music */}
+          {/* Compact Audio Player with Background Music */}
           {narrationUrl && (
-            <div className="p-6 pointer-events-auto">
+            <div className="px-4 py-2 pointer-events-auto max-w-2xl mx-auto">
               <AudioPlayer
                 narrationUrl={narrationUrl}
                 backgroundMusicUrl="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3"
               />
             </div>
           )}
+          
         </div>
       </div>
     </div>

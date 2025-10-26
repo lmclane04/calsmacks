@@ -37,23 +37,14 @@ export default function AudioPlayer({ narrationUrl, backgroundMusicUrl }: AudioP
   };
 
   return (
-    <div className="space-y-4">
-      {/* Narration Audio */}
-      <div className="p-4 bg-black/50 backdrop-blur-md rounded-lg border border-purple-500/30">
-        <div className="flex items-center space-x-3 mb-2">
-          <Volume2 className="w-5 h-5 text-purple-400" />
-          <span className="text-sm text-gray-300">Narration</span>
-        </div>
-        <audio
-          ref={narrationRef}
-          key={narrationUrl}
-          src={narrationUrl}
-          controls
-          autoPlay
-          className="w-full"
-        />
-        <div className="mt-2 flex items-center space-x-2">
-          <span className="text-xs text-gray-400">Volume:</span>
+    <div className="flex flex-col md:flex-row gap-2">
+      {/* Narration Audio - Compact version */}
+      <div className="p-2 bg-black/70 backdrop-blur-md rounded-lg border border-purple-500/30 flex-1">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Volume2 className="w-4 h-4 text-purple-400" />
+            <span className="text-xs text-gray-300">Narration</span>
+          </div>
           <input
             type="range"
             min="0"
@@ -61,52 +52,57 @@ export default function AudioPlayer({ narrationUrl, backgroundMusicUrl }: AudioP
             step="0.1"
             value={narrationVolume}
             onChange={(e) => setNarrationVolume(parseFloat(e.target.value))}
-            className="flex-1"
+            className="w-16"
           />
-          <span className="text-xs text-gray-400">{Math.round(narrationVolume * 100)}%</span>
         </div>
+        <audio
+          ref={narrationRef}
+          key={narrationUrl}
+          src={narrationUrl}
+          controls
+          autoPlay
+          className="w-full h-8 mt-1"
+        />
       </div>
 
-      {/* Background Music */}
+      {/* Background Music - Compact version */}
       {backgroundMusicUrl && (
-        <div className="p-4 bg-black/50 backdrop-blur-md rounded-lg border border-purple-500/30">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center space-x-3">
-              <Music className="w-5 h-5 text-pink-400" />
-              <span className="text-sm text-gray-300">Background Music</span>
+        <div className="p-2 bg-black/70 backdrop-blur-md rounded-lg border border-purple-500/30 flex-1">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Music className="w-4 h-4 text-pink-400" />
+              <span className="text-xs text-gray-300">Music</span>
             </div>
-            <button
-              onClick={toggleMusic}
-              className="p-2 rounded-full hover:bg-white/10 transition-colors"
-            >
-              {isMusicEnabled ? (
-                <Volume2 className="w-4 h-4 text-pink-400" />
-              ) : (
-                <VolumeX className="w-4 h-4 text-gray-500" />
-              )}
-            </button>
+            <div className="flex items-center gap-2">
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.1"
+                value={musicVolume}
+                onChange={(e) => setMusicVolume(parseFloat(e.target.value))}
+                className="w-16"
+                disabled={!isMusicEnabled}
+              />
+              <button
+                onClick={toggleMusic}
+                className="p-1 rounded-full hover:bg-white/10 transition-colors"
+              >
+                {isMusicEnabled ? (
+                  <Volume2 className="w-4 h-4 text-pink-400" />
+                ) : (
+                  <VolumeX className="w-4 h-4 text-gray-500" />
+                )}
+              </button>
+            </div>
           </div>
           <audio
             ref={musicRef}
             src={backgroundMusicUrl}
             loop
             autoPlay={isMusicEnabled}
-            className="w-full"
+            className="hidden"
           />
-          <div className="mt-2 flex items-center space-x-2">
-            <span className="text-xs text-gray-400">Volume:</span>
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.1"
-              value={musicVolume}
-              onChange={(e) => setMusicVolume(parseFloat(e.target.value))}
-              className="flex-1"
-              disabled={!isMusicEnabled}
-            />
-            <span className="text-xs text-gray-400">{Math.round(musicVolume * 100)}%</span>
-          </div>
         </div>
       )}
     </div>
