@@ -3,7 +3,16 @@ import multer from 'multer';
 import { FishAudioService } from '../services/fishAudio';
 
 const router = Router();
-const fishAudioService = new FishAudioService();
+
+// Lazy load service to ensure environment variables are loaded
+let fishAudioService: FishAudioService | null = null;
+
+function getFishAudioService() {
+  if (!fishAudioService) {
+    fishAudioService = new FishAudioService();
+  }
+  return fishAudioService;
+}
 
 // Configure multer for audio file uploads
 const upload = multer({
@@ -23,7 +32,7 @@ router.post('/transcribe', upload.single('audio'), async (req: Request, res: Res
 
     console.log('Transcribing audio:', req.file.originalname);
 
-    const transcription = await fishAudioService.transcribeAudio(req.file.buffer);
+    const transcription = await getFishAudioService().transcribeAudio(req.file.buffer);
 
     res.json({
       text: transcription,
@@ -53,7 +62,7 @@ router.post('/synthesize', async (req: Request, res: Response) => {
 
     console.log('Synthesizing speech for:', text.substring(0, 50) + '...');
 
-    const audioUrl = await fishAudioService.synthesizeSpeech(text, voice);
+    const audioUrl = await getFishAudioService().synthesizeSpeech(text, voice);
 
     res.json({
       audioUrl,

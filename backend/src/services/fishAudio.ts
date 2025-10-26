@@ -61,9 +61,10 @@ export class FishAudioService {
         `${this.baseUrl}/tts`,
         {
           text,
-          voice_id: voiceId || 'default',
+          temperature: 0.9,
+          top_p: 0.9,
           format: 'mp3',
-          sample_rate: 44100
+          model: 's1'
         },
         {
           headers: {

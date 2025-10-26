@@ -3,8 +3,24 @@ import { RekaService } from '../services/reka';
 import { FishAudioService } from '../services/fishAudio';
 
 const router = Router();
-const rekaService = new RekaService();
-const fishAudioService = new FishAudioService();
+
+// Lazy load services to ensure environment variables are loaded
+let rekaService: RekaService | null = null;
+let fishAudioService: FishAudioService | null = null;
+
+function getRekaService() {
+  if (!rekaService) {
+    rekaService = new RekaService();
+  }
+  return rekaService;
+}
+
+function getFishAudioService() {
+  if (!fishAudioService) {
+    fishAudioService = new FishAudioService();
+  }
+  return fishAudioService;
+}
 
 /**
  * POST /api/dream/process
@@ -21,15 +37,15 @@ router.post('/process', async (req: Request, res: Response) => {
     console.log('Processing dream:', description.substring(0, 100) + '...');
 
     // Step 1: Generate scene configuration using Reka
-    const sceneConfig = await rekaService.generateSceneConfig(description);
+    const sceneConfig = await getRekaService().generateSceneConfig(description);
     console.log('✓ Scene config generated');
 
     // Step 2: Generate poetic summary using Reka
-    const summary = await rekaService.generatePoeticSummary(description);
+    const summary = await getRekaService().generatePoeticSummary(description);
     console.log('✓ Poetic summary generated');
 
     // Step 3: Generate narration audio using Fish Audio
-    const narrationUrl = await fishAudioService.synthesizeSpeech(summary);
+    const narrationUrl = await getFishAudioService().synthesizeSpeech(summary);
     console.log('✓ Narration audio generated');
 
     res.json({
@@ -60,7 +76,7 @@ router.post('/scene', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Dream description is required' });
     }
 
-    const sceneConfig = await rekaService.generateSceneConfig(description);
+    const sceneConfig = await getRekaService().generateSceneConfig(description);
 
     res.json({ sceneConfig });
   } catch (error: unknown) {
