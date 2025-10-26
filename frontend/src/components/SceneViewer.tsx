@@ -199,14 +199,6 @@ function PostProcessingEffects({ config }: { config: SceneConfig }) {
         darkness={0.5}
         blendFunction={BlendFunction.NORMAL}
       />
-      
-      {/* Chromatic aberration for cosmic scenes */}
-      {isCosmic && (
-        <ChromaticAberration
-          offset={[0.002, 0.002]}
-          blendFunction={BlendFunction.NORMAL}
-        />
-      )}
     </EffectComposer>
   );
 }

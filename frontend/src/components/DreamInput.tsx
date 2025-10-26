@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { Mic, Send } from 'lucide-react';
 import axios from 'axios';
+import { getApiUrl } from '../config/api';
 
 interface DreamInputProps {
   onSubmit: (description: string, voiceId?: string) => void;
@@ -56,8 +57,7 @@ export default function DreamInput({ onSubmit, onVoiceChange, isLoading }: Dream
       const formData = new FormData();
       formData.append('audio', audioBlob, 'recording.webm');
 
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-      const response = await axios.post(`${apiUrl}/api/audio/transcribe`, formData, {
+      const response = await axios.post(getApiUrl('/api/audio/transcribe'), formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

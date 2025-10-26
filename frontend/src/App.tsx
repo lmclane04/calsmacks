@@ -4,6 +4,7 @@ import DreamInput from './components/DreamInput';
 import SceneViewer from './components/SceneViewer';
 import AudioPlayer from './components/AudioPlayer';
 import { SceneConfig } from './types';
+import { getApiUrl } from './config/api';
 
 function App() {
   const [sceneConfig, setSceneConfig] = useState<SceneConfig | null>(null);
@@ -17,7 +18,7 @@ function App() {
   const handleDreamSubmit = async (description: string, voiceId?: string) => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/dream/process', {
+      const response = await fetch(getApiUrl('/api/dream/process'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ description, voiceId })
@@ -49,7 +50,7 @@ function App() {
 
     setIsRegeneratingNarration(true);
     try {
-      const response = await fetch('/api/audio/synthesize', {
+      const response = await fetch(getApiUrl('/api/audio/synthesize'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: summary, voice: newVoiceId })

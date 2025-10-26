@@ -45,7 +45,7 @@ app.get('/health', (_req, res) => {
 });
 
 // Error handling
-app.use((err: Error & { status?: number }, _req: express.Request, res: express.Response) => {
+app.use((err: Error & { status?: number }, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error('Error:', err);
   res.status(err.status || 500).json({
     error: err.message || 'Internal server error',
