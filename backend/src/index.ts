@@ -3,15 +3,19 @@
 import dotenv from 'dotenv';
 import path from 'path';
 
-const dotenvResult = dotenv.config();
-console.log('📍 Current working directory:', process.cwd());
-console.log('📄 Loading .env from:', path.resolve(process.cwd(), '.env'));
-if (dotenvResult.error) {
-  console.error('❌ Error loading .env file:', dotenvResult.error);
-} else {
-  console.log('✅ .env file loaded successfully');
-  console.log('🔑 USE_GROQ from .env:', process.env.USE_GROQ);
+// Only try to load .env file in development (Railway uses environment variables directly)
+if (process.env.NODE_ENV !== 'production') {
+  const dotenvResult = dotenv.config();
+  console.log('📍 Current working directory:', process.cwd());
+  console.log('📄 Loading .env from:', path.resolve(process.cwd(), '.env'));
+  if (dotenvResult.error) {
+    console.error('❌ Error loading .env file:', dotenvResult.error);
+  } else {
+    console.log('✅ .env file loaded successfully');
+  }
 }
+
+console.log('🔑 USE_GROQ:', process.env.USE_GROQ);
 
 // Now import modules that depend on environment variables
 import express from 'express';
