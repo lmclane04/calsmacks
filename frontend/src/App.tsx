@@ -7,7 +7,9 @@ function App() {
   const [sceneConfig, setSceneConfig] = useState<SceneConfig | null>(null);
   const [narrationUrl, setNarrationUrl] = useState<string | null>(null);
   const [summary, setSummary] = useState<string | null>(null);
+  const [currentVoiceId, setCurrentVoiceId] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
+  const [isRegeneratingNarration, setIsRegeneratingNarration] = useState(false);
 
   const handleDreamSubmit = async (description: string, voiceId?: string) => {
     setIsLoading(true);
@@ -26,11 +28,42 @@ function App() {
       setSceneConfig(data.sceneConfig);
       setNarrationUrl(data.narrationUrl);
       setSummary(data.summary);
+      setCurrentVoiceId(voiceId);
     } catch (error) {
       console.error('Error processing dream:', error);
       alert('Failed to process dream. Please try again.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleVoiceChange = async (newVoiceId: string) => {
+    // Only regenerate if we have existing narration and the voice actually changed
+    if (!summary || !narrationUrl || currentVoiceId === newVoiceId) {
+      setCurrentVoiceId(newVoiceId);
+      return;
+    }
+
+    setIsRegeneratingNarration(true);
+    try {
+      const response = await fetch('/api/audio/synthesize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: summary, voice: newVoiceId })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to regenerate narration');
+      }
+
+      const data = await response.json();
+      setNarrationUrl(data.audioUrl);
+      setCurrentVoiceId(newVoiceId);
+    } catch (error) {
+      console.error('Error regenerating narration:', error);
+      alert('Failed to regenerate narration with new voice. Please try again.');
+    } finally {
+      setIsRegeneratingNarration(false);
     }
   };
 
@@ -55,7 +88,11 @@ function App() {
           {/* Main Content */}
           <div className="flex-1 flex items-end justify-center pb-8">
             <div className="w-full max-w-2xl px-6 pointer-events-auto">
-              <DreamInput onSubmit={handleDreamSubmit} isLoading={isLoading} />
+              <DreamInput
+                onSubmit={handleDreamSubmit}
+                onVoiceChange={handleVoiceChange}
+                isLoading={isLoading || isRegeneratingNarration}
+              />
               
               {/* Summary Display */}
               {summary && (
@@ -70,6 +107,7 @@ function App() {
           {narrationUrl && (
             <div className="p-6 pointer-events-auto">
               <audio
+                key={narrationUrl}
                 src={narrationUrl}
                 controls
                 autoPlay

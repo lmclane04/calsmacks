@@ -4,6 +4,7 @@ import axios from 'axios';
 
 interface DreamInputProps {
   onSubmit: (description: string, voiceId?: string) => void;
+  onVoiceChange: (voiceId: string) => void;
   isLoading: boolean;
 }
 
@@ -15,7 +16,7 @@ const VOICE_OPTIONS = [
   { id: '3b0cf238656c4def98ecfb8fe1f6b382', name: 'Lauren' },
 ];
 
-export default function DreamInput({ onSubmit, isLoading }: DreamInputProps) {
+export default function DreamInput({ onSubmit, onVoiceChange, isLoading }: DreamInputProps) {
   const [description, setDescription] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [selectedVoice, setSelectedVoice] = useState(VOICE_OPTIONS[0].id); // Default to first voice (Madison)
@@ -137,7 +138,11 @@ export default function DreamInput({ onSubmit, isLoading }: DreamInputProps) {
         <select
           id="voice-select"
           value={selectedVoice}
-          onChange={(e) => setSelectedVoice(e.target.value)}
+          onChange={(e) => {
+            const newVoice = e.target.value;
+            setSelectedVoice(newVoice);
+            onVoiceChange(newVoice);
+          }}
           disabled={isLoading}
           className="flex-1 px-4 py-2 bg-black/70 backdrop-blur-md border border-purple-500/50 rounded-lg text-white focus:outline-none focus:border-purple-500 disabled:opacity-50"
         >
