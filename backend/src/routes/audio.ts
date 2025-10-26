@@ -1,17 +1,26 @@
 import { Router, Request, Response } from 'express';
 import multer from 'multer';
 import { FishAudioService } from '../services/fishAudio';
+import { DeepgramService } from '../services/deepgram';
 
 const router = Router();
 
-// Lazy load service to ensure environment variables are loaded
+// Lazy load services to ensure environment variables are loaded
 let fishAudioService: FishAudioService | null = null;
+let deepgramService: DeepgramService | null = null;
 
 function getFishAudioService() {
   if (!fishAudioService) {
     fishAudioService = new FishAudioService();
   }
   return fishAudioService;
+}
+
+function getDeepgramService() {
+  if (!deepgramService) {
+    deepgramService = new DeepgramService();
+  }
+  return deepgramService;
 }
 
 // Configure multer for audio file uploads
@@ -30,9 +39,23 @@ router.post('/transcribe', upload.single('audio'), async (req: Request, res: Res
       return res.status(400).json({ error: 'Audio file is required' });
     }
 
-    console.log('Transcribing audio:', req.file.originalname);
+    console.log('\n' + '🎙️'.repeat(30));
+    console.log('📥 AUDIO TRANSCRIPTION ENDPOINT HIT');
+    console.log(`   File: ${req.file.originalname}`);
+    console.log(`   Size: ${(req.file.size / 1024).toFixed(2)} KB`);
+    console.log(`   MIME Type: ${req.file.mimetype}`);
+    console.log(`   Service: Deepgram (Nova-2)`);
+    console.log('🎙️'.repeat(30));
 
-    const transcription = await getFishAudioService().transcribeAudio(req.file.buffer);
+    // Use Deepgram for transcription (more accurate than Fish Audio)
+    const transcription = await getDeepgramService().transcribeAudio(
+      req.file.buffer,
+      req.file.originalname
+    );
+
+    console.log('✅ TRANSCRIPTION ENDPOINT COMPLETE');
+    console.log(`   Preview: "${transcription.substring(0, 80)}${transcription.length > 80 ? '...' : ''}"`);
+    console.log('🎙️'.repeat(30) + '\n');
 
     res.json({
       text: transcription,
@@ -40,7 +63,7 @@ router.post('/transcribe', upload.single('audio'), async (req: Request, res: Res
     });
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Error transcribing audio:', error);
+    console.error('❌ ERROR in transcription endpoint:', error);
     res.status(500).json({
       error: 'Failed to transcribe audio',
       details: errorMessage
