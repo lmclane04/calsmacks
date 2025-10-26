@@ -1,3 +1,23 @@
+export interface MaterialProperties {
+  color?: string;
+  emissive?: string;
+  emissiveIntensity?: number;
+  metalness?: number;
+  roughness?: number;
+  opacity?: number;
+  transparent?: boolean;
+  envMapIntensity?: number;
+  clearcoat?: number;
+  clearcoatRoughness?: number;
+  pulsate?: boolean;
+  pulsateSpeed?: number;
+  float?: boolean;
+  floatAmplitude?: number;
+  floatSpeed?: number;
+  rotate?: boolean;
+  rotateSpeed?: number | number[];
+}
+
 export interface SceneObject {
   type: string;
   position: [number, number, number];
