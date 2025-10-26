@@ -2,18 +2,27 @@ import { useState } from 'react';
 import { Mic, Send } from 'lucide-react';
 
 interface DreamInputProps {
-  onSubmit: (description: string) => void;
+  onSubmit: (description: string, voiceId?: string) => void;
   isLoading: boolean;
 }
+
+// Available Fish Audio voices
+// Note: Replace these placeholder IDs with actual Fish Audio voice reference IDs
+// Get real voice IDs from: https://fish.audio
+const VOICE_OPTIONS = [
+  { id: '60aa5a7082244ff48ad20afca19f80fe', name: 'Madison' },
+  { id: '3b0cf238656c4def98ecfb8fe1f6b382', name: 'Lauren' },
+];
 
 export default function DreamInput({ onSubmit, isLoading }: DreamInputProps) {
   const [description, setDescription] = useState('');
   const [isRecording, setIsRecording] = useState(false);
+  const [selectedVoice, setSelectedVoice] = useState('default');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (description.trim() && !isLoading) {
-      onSubmit(description);
+      onSubmit(description, selectedVoice);
     }
   };
 
@@ -32,6 +41,26 @@ export default function DreamInput({ onSubmit, isLoading }: DreamInputProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Voice Selector */}
+      <div className="flex items-center space-x-3">
+        <label htmlFor="voice-select" className="text-purple-300 text-sm font-medium">
+          Narrator Voice:
+        </label>
+        <select
+          id="voice-select"
+          value={selectedVoice}
+          onChange={(e) => setSelectedVoice(e.target.value)}
+          disabled={isLoading}
+          className="flex-1 px-4 py-2 bg-black/70 backdrop-blur-md border border-purple-500/50 rounded-lg text-white focus:outline-none focus:border-purple-500 disabled:opacity-50"
+        >
+          {VOICE_OPTIONS.map((voice) => (
+            <option key={voice.id} value={voice.id}>
+              {voice.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
       <div className="relative">
         <textarea
           value={description}

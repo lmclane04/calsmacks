@@ -28,7 +28,7 @@ function getFishAudioService() {
  */
 router.post('/process', async (req: Request, res: Response) => {
   try {
-    const { description } = req.body;
+    const { description, voiceId } = req.body;
 
     if (!description || typeof description !== 'string') {
       return res.status(400).json({ error: 'Dream description is required' });
@@ -44,8 +44,8 @@ router.post('/process', async (req: Request, res: Response) => {
     const summary = await getRekaService().generatePoeticSummary(description);
     console.log('✓ Poetic summary generated');
 
-    // Step 3: Generate narration audio using Fish Audio
-    const narrationUrl = await getFishAudioService().synthesizeSpeech(summary);
+    // Step 3: Generate narration audio using Fish Audio with optional voiceId
+    const narrationUrl = await getFishAudioService().synthesizeSpeech(summary, voiceId);
     console.log('✓ Narration audio generated');
 
     res.json({

@@ -9,13 +9,13 @@ function App() {
   const [summary, setSummary] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleDreamSubmit = async (description: string) => {
+  const handleDreamSubmit = async (description: string, voiceId?: string) => {
     setIsLoading(true);
     try {
       const response = await fetch('/api/dream/process', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ description })
+        body: JSON.stringify({ description, voiceId })
       });
 
       if (!response.ok) {

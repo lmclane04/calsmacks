@@ -57,15 +57,23 @@ export class FishAudioService {
 
     try {
       // Fish Audio TTS endpoint
+      // Build request body - only include reference_id if it's a valid Fish Audio voice ID
+      const requestBody: Record<string, unknown> = {
+        text,
+        temperature: 0.9,
+        top_p: 0.9,
+        format: 'mp3',
+        model: 's1'
+      };
+      
+      // Only add reference_id if voiceId is provided and not a placeholder
+      if (voiceId && voiceId !== 'default' && !voiceId.includes('-')) {
+        requestBody.reference_id = voiceId;
+      }
+      
       const response = await axios.post(
         `${this.baseUrl}/tts`,
-        {
-          text,
-          temperature: 0.9,
-          top_p: 0.9,
-          format: 'mp3',
-          model: 's1'
-        },
+        requestBody,
         {
           headers: {
             'Authorization': `Bearer ${this.apiKey}`,
