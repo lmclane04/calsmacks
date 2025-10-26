@@ -118,7 +118,7 @@ Create 5-15 objects that represent the dream. Use creative positioning and color
    */
   async generatePoeticSummary(description: string): Promise<string> {
     if (!this.apiKey) {
-      return this.getMockPoeticSummary(description);
+      return this.getMockPoeticSummary();
     }
 
     try {
