@@ -1,4 +1,5 @@
 import Groq from 'groq-sdk';
+import { SceneLibrary, SceneType } from './sceneLibrary';
 
 interface SceneObject {
   type: string;
@@ -41,70 +42,96 @@ export class GroqService {
   }
 
   /**
-   * Generate a 3D scene configuration from a dream description using Groq
+   * Generate a 3D scene configuration from a dream description using curated scene types
    */
   async generateSceneConfig(description: string): Promise<SceneConfig> {
-    if (!this.client) {
-      return this.getMockSceneConfig();
-    }
-
     try {
-      const prompt = `You are a 3D scene generator. Given a dream description, generate a JSON configuration for a Three.js scene.
-
-Dream description: "${description}"
-
-Generate a JSON object with this structure:
-{
-  "objects": [
-    {
-      "type": "sphere|box|cylinder|cone|torus",
-      "position": [x, y, z],
-      "rotation": [x, y, z],
-      "scale": [x, y, z],
-      "color": "#hexcolor",
-      "properties": {}
-    }
-  ],
-  "lighting": {
-    "ambient": { "color": "#hexcolor", "intensity": 0.0-1.0 },
-    "directional": { "color": "#hexcolor", "intensity": 0.0-2.0, "position": [x, y, z] }
-  },
-  "camera": {
-    "position": [x, y, z],
-    "lookAt": [x, y, z]
-  },
-  "environment": {
-    "skyColor": "#hexcolor",
-    "fogColor": "#hexcolor",
-    "fogDensity": 0.0-1.0
-  }
-}
-
-Create 5-15 objects that represent the dream. Use creative positioning and colors. Respond with ONLY the JSON, no other text.`;
-
-      const completion = await this.client.chat.completions.create({
-        messages: [
-          { role: 'user', content: prompt }
-        ],
-        model: 'llama-3.3-70b-versatile', // Fast and capable model
-        temperature: 0.7,
-        max_tokens: 2000,
-      });
-
-      const content = completion.choices[0]?.message?.content || '';
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      console.log(`🎯 CURATED SCENE GENERATION`);
+      console.log(`   Input: "${description.substring(0, 80)}..."`);
       
-      if (jsonMatch) {
-        return JSON.parse(jsonMatch[0]);
+      // Step 1: Classify the scene type
+      const sceneType = SceneLibrary.classifyScene(description);
+      console.log(`   Classified as: ${sceneType.toUpperCase()} scene`);
+      
+      // Step 2: Generate curated scene
+      const sceneConfig = SceneLibrary.generateCuratedScene(sceneType, description);
+      console.log(`   Generated ${sceneConfig.objects.length} curated objects`);
+      
+      // Step 3: Use AI to add creative variations if API is available
+      if (this.client) {
+        try {
+          const enhancedConfig = await this.enhanceSceneWithAI(sceneConfig, sceneType, description);
+          console.log(`   ✨ Enhanced with AI variations`);
+          return enhancedConfig;
+        } catch (error) {
+          console.log(`   ⚠️  AI enhancement failed, using base curated scene`);
+          return sceneConfig;
+        }
       }
-
-      throw new Error('Failed to parse scene configuration from response');
+      
+      return sceneConfig;
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      console.error('Groq API error:', errorMessage);
+      console.error('Scene generation error:', errorMessage);
       console.log('Falling back to mock scene config');
       return this.getMockSceneConfig();
     }
+  }
+
+  /**
+   * Use AI to add creative variations to the curated scene
+   */
+  private async enhanceSceneWithAI(baseConfig: SceneConfig, sceneType: SceneType, description: string): Promise<SceneConfig> {
+    if (!this.client) return baseConfig;
+
+    const scenePrompts = {
+      cosmic: `You are enhancing a cosmic scene. The base scene has planets, stars, and celestial objects. Add 2-3 creative variations based on: "${description}"
+      
+Available cosmic elements: nebula wisps (torus), asteroid belt (small spheres), cosmic rings (torus), glowing orbs (sphere with emissive), space crystals (cone/cylinder).`,
+      
+      garden: `You are enhancing a garden scene. The base scene has flowers, trees, and mushrooms. Add 2-3 creative variations based on: "${description}"
+      
+Available garden elements: butterfly paths (small moving spheres), garden stones (sphere), fountain center (cylinder), flower petals (small spheres), hanging fruits (sphere).`,
+      
+      underwater: `You are enhancing an underwater scene. The base scene has fish, coral, and kelp. Add 2-3 creative variations based on: "${description}"
+      
+Available underwater elements: treasure chest (box), sea anemone (cone), school of fish (multiple small spheres), water currents (cylinder), sea shells (cone).`
+    };
+
+    const prompt = `${scenePrompts[sceneType]}
+
+Add ONLY 2-3 objects in this JSON format:
+[
+  {
+    "type": "sphere|box|cylinder|cone|torus",
+    "position": [x, y, z],
+    "scale": [x, y, z],
+    "color": "#hexcolor",
+    "properties": {}
+  }
+]
+
+Respond with ONLY the JSON array of new objects.`;
+
+    const completion = await this.client.chat.completions.create({
+      messages: [{ role: 'user', content: prompt }],
+      model: 'llama-3.3-70b-versatile',
+      temperature: 0.8,
+      max_tokens: 500,
+    });
+
+    const content = completion.choices[0]?.message?.content || '';
+    const jsonMatch = content.match(/\[[\s\S]*\]/);
+    
+    if (jsonMatch) {
+      const newObjects = JSON.parse(jsonMatch[0]);
+      return {
+        ...baseConfig,
+        objects: [...baseConfig.objects, ...newObjects]
+      };
+    }
+
+    return baseConfig;
   }
 
   /**

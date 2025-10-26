@@ -18,7 +18,7 @@ import express from 'express';
 import cors from 'cors';
 // Use require() for routes to ensure they load AFTER dotenv.config()
 const dreamRoutes = require('./routes/dream').default;
-const audioRoutes = require('./routes/audio').default;
+// const audioRoutes = require('./routes/audio').default; // Temporarily disabled
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -33,7 +33,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/dream', dreamRoutes);
-app.use('/api/audio', audioRoutes);
+// app.use('/api/audio', audioRoutes); // Temporarily disabled
 
 // Health check
 app.get('/health', (_req, res) => {
